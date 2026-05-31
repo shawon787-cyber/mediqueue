@@ -1,6 +1,8 @@
 import "./globals.css";
 import Navbar from "@/componenets/Navbar";
 import Footer from "@/componenets/Footer";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
   title: "MediQueue",
@@ -14,6 +16,7 @@ export default function RootLayout({ children }) {
         <Navbar />
         <main className="flex-grow w-full">
           {children}
+          <ToastContainer position="top-right" />
         </main>
         <Footer />
       </body>
