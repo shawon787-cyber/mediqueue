@@ -1,45 +1,27 @@
+import React from 'react';
 import { IoBookOutline } from "react-icons/io5";
 import { MdOutlineDateRange } from "react-icons/md";
 import { IoMdTime } from "react-icons/io";
 import { CiLocationOn } from "react-icons/ci";
 import Link from "next/link";
 
-const TutorsPage = async () => {
+const AvailableTutors = async () => {
     const res = await fetch("http://localhost:5000/tutors");
     const tutors = await res.json();
-
     return (
         <div className="container px-4 mx-auto py-12">
-            
-            <div className="bg-gradient-to-r from-[#c7e4f7] via-[#eef7fd] to-[#e7f3fc] rounded-3xl p-10 mb-10">
-    <h1 className="text-5xl font-bold text-gray-800 mb-4">
-        Find your tutor
-    </h1>
-
-    <p className="text-gray-500 mb-8">
-        Search by name or filter by session date.
-    </p>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-            type="text"
-            placeholder="Search tutors..."
-            className="input input-bordered w-full"
-        />
-
-        <input
-            type="date"
-            className="input input-bordered w-full"
-        />
-
-        <input
-            type="date"
-            className="input input-bordered w-full"
-        />
-    </div>
-</div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className='text-gray-800 font-bold text-3xl'>Available Tutors</h2>
+                    <p className='text-sm text-gray-500'>Top-rated experts ready to teach.</p>
+                </div>
+                <Link href="/tutors">
+                <button className='bg-[#0675C1] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg cursor-pointer'>
+                    View All
+                </button>
+                </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
                 {tutors.map((tutor) => (
                     <div key={tutor._id} className="bg-base-100 shadow-md rounded-lg overflow-hidden">
                         <div>
@@ -91,4 +73,4 @@ const TutorsPage = async () => {
     );
 };
 
-export default TutorsPage;
+export default AvailableTutors;

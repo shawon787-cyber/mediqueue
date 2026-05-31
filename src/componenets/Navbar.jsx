@@ -12,7 +12,7 @@ export default function Navbar() {
             <li><Link href="/">Home</Link></li>
             <li><Link href="/tutors">Tutors</Link></li>
             <li><Link href="/add-tutor">Add Tutor</Link></li>
-            <li><Link href="/my-tutors">My Tutors</Link></li>
+            <li><Link href="/MyTutors">My Tutors</Link></li>
             <li><Link href="/booked-sessions">My Booked Sessions</Link></li>
             <li><Link href="/login">Login</Link></li>
         </>
