@@ -194,21 +194,21 @@ const MyTutorsPage = () => {
                 name="tutorName"
                 value={formData.tutorName}
                 onChange={handleChange}
-                className="w-full border p-2 rounded"
+                className="w-full shadow p-2 rounded bg-sky-50"
               />
 
               <input
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                className="w-full border p-2 rounded"
+                className="w-full shadow p-2 rounded bg-sky-50"
               />
 
               <input
                 name="hourlyFee"
                 value={formData.hourlyFee}
                 onChange={handleChange}
-                className="w-full border p-2 rounded"
+                className="w-full shadow p-2 rounded bg-sky-50"
                 type="number"
               />
 
@@ -216,7 +216,7 @@ const MyTutorsPage = () => {
                 name="totalSlot"
                 value={formData.totalSlot}
                 onChange={handleChange}
-                className="w-full border p-2 rounded"
+                className="w-full shadow p-2 rounded bg-sky-50"
                 type="number"
               />
 
@@ -224,7 +224,7 @@ const MyTutorsPage = () => {
                 name="sessionStartDate"
                 value={formData.sessionStartDate}
                 onChange={handleChange}
-                className="w-full border p-2 rounded"
+                className="w-full shadow p-2 rounded bg-sky-50"
                 type="date"
               />
             </div>
