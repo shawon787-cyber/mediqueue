@@ -90,8 +90,8 @@ const AvailableTutors = async () => {
                   </p>
 
                   <Link href={`/tutors/${tutor._id}`}>
-                    <button className="bg-[#0675C1] hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow">
-                      Details
+                    <button className="bg-[#0675C1] hover:bg-[#0564A5] text-white px-4 py-2 rounded-md shadow-[0_4px_6px_rgba(0,0,0,0.1)] cursor-pointer transition">
+                      Book Session
                     </button>
                   </Link>
                 </div>

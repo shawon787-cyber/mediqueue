@@ -117,7 +117,7 @@ const TutorDetailsPage = async ({ params }) => {
           </p>
 
           <button className="w-full mt-6 bg-[#0675C1] text-white py-3 rounded-xl font-bold hover:bg-[#0564a4] transition-all shadow-lg shadow-blue-100">
-            Book Session
+            Book Now
           </button>
         </div>
       </div>

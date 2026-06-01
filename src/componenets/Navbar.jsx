@@ -14,7 +14,8 @@ export default function Navbar() {
             <li><Link href="/add-tutor">Add Tutor</Link></li>
             <li><Link href="/MyTutors">My Tutors</Link></li>
             <li><Link href="/booked-sessions">My Booked Sessions</Link></li>
-            <li><Link href="/login">Login</Link></li>
+            <li><Link href="/sign-up">Register</Link></li>
+            <li><Link href="/Login">Login</Link></li>
         </>
     );
 
