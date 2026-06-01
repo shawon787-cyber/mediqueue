@@ -5,6 +5,7 @@ const nextConfig = {
     domains: [
       "cdn-icons-png.flaticon.com",
       "static.vecteezy.com",
+      "placehold.co",
     ],
   },
 };

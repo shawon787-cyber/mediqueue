@@ -1,126 +1,101 @@
 "use client";
 
-import Link from "next/link";
-import {
-  FaUser,
-  FaEnvelope,
-  FaImage,
-  FaLock,
-  FaGoogle,
-} from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
+import { Button, Input } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { useState } from "react";
 
-export default function RegisterPage() {
+const validatePassword = (password) => {
+  if (!password) return "Password is required.";
+  if (password.length < 6) return "Password must be at least 6 characters.";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter.";
+  if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter.";
+  return "";
+};
+
+export default function SignUpPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+    setPasswordError("");
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    const email = String(formData.get("email") || "");
+    const password = String(formData.get("password") || "");
+    const name = String(formData.get("name") || "");
+    const image = String(formData.get("image") || "");
+
+    const validationMessage = validatePassword(password);
+    if (validationMessage) {
+      setPasswordError(validationMessage);
+      toast.error(validationMessage);
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+      image: image ? image : undefined,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setFormError(error.message || "Signup failed");
+      toast.error(error.message || "Signup failed");
+      return;
+    }
+
+    toast.success("Signup successful");
+    router.push("/Login");
+  };
+
+  const handleGoogleAuth = () => {
+    window.location.href = "/api/auth/sign-in/google";
+  };
+
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#045A94]">
-            Create Account
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Register to get started
-          </p>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50">
+      <form onSubmit={onSubmit} className="w-full max-w-md space-y-6 bg-white p-8 rounded-3xl shadow-xl">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Register</h1>
+          <p className="mt-2 text-sm text-slate-500">Create your account to continue.</p>
         </div>
 
-        <form className="space-y-5">
-          <div>
-            <label className="block mb-2 font-medium">
-              Name
-            </label>
+        {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
+        {passwordError ? <p className="text-sm text-red-600">{passwordError}</p> : null}
 
-            <div className="relative">
-              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Input name="name" label="Name" required />
+        <Input name="image" label="Photo URL" />
+        <Input name="email" label="Email" required />
+        <Input name="password" type="password" label="Password" required />
 
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full border rounded-lg pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#045A94]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium">
-              Email
-            </label>
-
-            <div className="relative">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border rounded-lg pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#045A94]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium">
-              Photo URL
-            </label>
-
-            <div className="relative">
-              <FaImage className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-
-              <input
-                type="url"
-                placeholder="Enter photo URL"
-                className="w-full border rounded-lg pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#045A94]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium">
-              Password
-            </label>
-
-            <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-
-              <input
-                type="password"
-                placeholder="Enter password"
-                className="w-full border rounded-lg pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#045A94]"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-3 rounded-lg bg-[#045A94] text-white font-semibold hover:bg-[#044D80] transition"
-          >
-            Register
-          </button>
-        </form>
-
-        <div className="flex items-center gap-4 my-6">
-          <div className="flex-1 border-t"></div>
-          <span className="text-sm text-gray-500">
-            OR
-          </span>
-          <div className="flex-1 border-t"></div>
-        </div>
+        <Button type="submit" className="w-full bg-amber-300" isDisabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </Button>
 
         <button
-          className="w-full border rounded-lg py-3 flex items-center justify-center gap-3 hover:bg-gray-50 transition"
+          type="button"
+          onClick={handleGoogleAuth}
+          className="w-full rounded-lg border border-slate-300 py-3 text-slate-700 hover:bg-slate-50"
         >
-          <FaGoogle className="text-red-500" />
           Continue with Google
         </button>
 
-        <p className="text-center mt-6 text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-semibold text-[#045A94]"
-          >
-            Login
-          </Link>
+        <p className="text-center text-sm text-slate-600">
+          Already have an account? <a href="/Login" className="font-semibold text-slate-900">Login</a>
         </p>
-      </div>
+      </form>
     </div>
   );
 }
