@@ -36,8 +36,15 @@ export default function LoginPage() {
     router.push("/");
   };
 
-  const handleGoogleAuth = () => {
-    window.location.href = "/api/auth/sign-in/google";
+  const handleGoogleAuth = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+    });
+
+    if (error) {
+      const message = error.message || "Google sign in failed";
+      toast.error(message);
+    }
   };
 
   return (
