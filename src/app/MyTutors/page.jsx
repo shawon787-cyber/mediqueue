@@ -1,5 +1,5 @@
 "use client";
-
+import PrivateRoute from "@/components/PrivateRoute";
 import { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
@@ -130,7 +130,8 @@ const MyTutorsPage = () => {
   };
 
   return (
-    <div className="container px-4 mx-auto py-12">
+    <PrivateRoute>
+      <div className="container px-4 mx-auto py-12">
       <h2 className="text-gray-800 font-bold text-3xl mb-8">
         My Tutors
       </h2>
@@ -279,6 +280,8 @@ const MyTutorsPage = () => {
         </div>
       )}
     </div>
+    </PrivateRoute>
+    
   );
 };
 

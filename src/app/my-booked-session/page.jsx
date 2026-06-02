@@ -1,5 +1,5 @@
 "use client";
-
+import PrivateRoute from "@/components/PrivateRoute";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 
@@ -36,7 +36,8 @@ export default function MyBookedSession() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <PrivateRoute>
+      <div className="container mx-auto px-4 py-10">
       <h1 className="text-5xl font-bold mb-8">
         My Booked Sessions
       </h1>
@@ -93,5 +94,7 @@ export default function MyBookedSession() {
         </table>
       </div>
     </div>
+    </PrivateRoute>
+    
   );
 }

@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth-client";
 export default function Navbar() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
+  console.log("Current user:", user);
 
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -33,17 +34,23 @@ export default function Navbar() {
         <Link href="/tutors">Tutors</Link>
       </li>
 
-      <li>
-        <Link href="/add-tutor">Add Tutor</Link>
-      </li>
+       {user && (
+      <>
+        <li>
+          <Link href="/add-tutor">Add Tutor</Link>
+        </li>
 
-      <li>
-        <Link href="/MyTutors">My Tutors</Link>
-      </li>
+        <li>
+          <Link href="/MyTutors">My Tutors</Link>
+        </li>
 
-      <li>
-        <Link href="/my-booked-session">My Booked Sessions</Link>
-      </li>
+        <li>
+          <Link href="/my-booked-session">
+            My Booked Sessions
+          </Link>
+        </li>
+      </>
+    )}
     </>
   );
 
@@ -92,7 +99,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {user ? (
+          {user ?  (
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}

@@ -9,6 +9,7 @@ import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { RiVideoChatLine } from "react-icons/ri";
 import Link from "next/link";
 import TutorClientSection from "@/components/TutorClientSection";
+import PrivateRoute from "@/components/PrivateRoute";
 
 export default async function TutorDetailsPage({ params }) {
   const { id } =await params;
@@ -47,7 +48,8 @@ export default async function TutorDetailsPage({ params }) {
   const tutor = data.data;
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <PrivateRoute>
+      <div className="container mx-auto px-4 py-10">
       <Link href="/tutors" className="text-blue-600 underline">
         ← Back
       </Link>
@@ -135,5 +137,6 @@ export default async function TutorDetailsPage({ params }) {
 
       </div>
     </div>
+    </PrivateRoute>
   );
 }

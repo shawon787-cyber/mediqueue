@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import PrivateRoute from "@/components/PrivateRoute";
 import { toast } from "react-toastify";
 
 const AddTutorPage = () => {
@@ -36,7 +36,8 @@ const AddTutorPage = () => {
   }
 };
     return (
-        <div className="max-w-xl mx-auto py-12">
+        <PrivateRoute>
+            <div className="max-w-xl mx-auto py-12">
           <h2 className="text-3xl font-bold text-center mb-5">Add New Tutor</h2>
             <form onSubmit={onSubmit} className="p-10 space-y-8 shadow-lg rounded-xl bg-gray-50 ">
 
@@ -256,7 +257,10 @@ const AddTutorPage = () => {
 
 </form>
         </div>
+        </PrivateRoute>
     );
 };
+        
+    
 
 export default AddTutorPage;
