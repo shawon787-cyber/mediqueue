@@ -64,7 +64,7 @@ export default function MyBookedSession() {
                 <td>{booking.studentEmail}</td>
 
                 <td>
-                  {booking.status === "Pending" ? (
+                  {/* {booking.status === "Pending" ? (
                     <span className="badge badge-info">
                       Pending
                     </span>
@@ -72,7 +72,8 @@ export default function MyBookedSession() {
                     <span className="badge badge-error">
                       Cancelled
                     </span>
-                  )}
+                  )} */}
+                  <span>{booking.status}</span>
                 </td>
 
                 <td>
