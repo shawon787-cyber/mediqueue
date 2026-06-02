@@ -64,7 +64,8 @@ export default function MyBookedSession() {
                 <td>{booking.studentEmail}</td>
 
                 <td>
-                  {/* {booking.status === "Pending" ? (
+                  
+                  {booking.status === "Pending" ? (
                     <span className="badge badge-info">
                       Pending
                     </span>
@@ -72,21 +73,18 @@ export default function MyBookedSession() {
                     <span className="badge badge-error">
                       Cancelled
                     </span>
-                  )} */}
-                  <span>{booking.status}</span>
+                  )}
                 </td>
 
                 <td>
                   <button
-                    disabled={
-                      booking.status === "Cancelled"
-                    }
-                    onClick={() =>
-                      handleCancel(booking._id)
-                    }
-                    className="btn btn-sm"
+                    disabled={booking.status === "Cancelled"}
+                    onClick={() => handleCancel(booking._id)}
+                    className="btn btn-sm btn-error"
                   >
-                    Cancel
+                    {booking.status === "Cancelled"
+                      ? "Cancelled"
+                      : "Cancel"}
                   </button>
                 </td>
               </tr>
