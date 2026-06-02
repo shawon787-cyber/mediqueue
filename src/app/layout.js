@@ -1,9 +1,9 @@
 import "./globals.css";
-import Navbar from "@/componenets/Navbar";
-import Footer from "@/componenets/Footer";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ThemeProvider from "@/componenets/ThemeProvider";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata = {
   title: "MediQueue",

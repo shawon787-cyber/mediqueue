@@ -1,7 +1,7 @@
 
-import Banner from "@/componenets/Banner";
-import WhyMediQueue from "@/componenets/WhyMediQueue";
-import TeachSection from "@/componenets/TeachSection";
+import Banner from "@/components/Banner";
+import WhyMediQueue from "@/components/WhyMediQueue";
+import TeachSection from "@/components/TeachSection";
 import AvailableTutors from "./AvailableTutors/page";
 
 export default function Home() {
