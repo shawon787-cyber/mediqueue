@@ -88,7 +88,7 @@ const TutorsPage = async () => {
                                         <span className="text-gray-500 text-sm font-mono">/hr</span>
                                     </p>
                                     <Link href={`/tutors/${tutor._id}`}>
-                                        <button className="btn bg-[#0675C1] text-white hover:bg-[#0675C1] shadow-lg rounded-md">Details</button>
+                                        <button className="btn bg-[#0675C1] text-white hover:bg-[#0675C1] shadow-lg rounded-md">Book Session</button>
                                     </Link>
                                 </div>
                             </div>

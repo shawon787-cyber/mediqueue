@@ -3,6 +3,7 @@ import Navbar from "@/componenets/Navbar";
 import Footer from "@/componenets/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ThemeProvider from "@/componenets/ThemeProvider";
 
 export const metadata = {
   title: "MediQueue",
@@ -13,6 +14,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
+        <ThemeProvider />
         <Navbar />
         <main className="flex-grow w-full">
           {children}

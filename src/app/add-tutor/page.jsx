@@ -37,7 +37,8 @@ const AddTutorPage = () => {
 };
     return (
         <div className="max-w-xl mx-auto py-12">
-            <form onSubmit={onSubmit} className="p-10 space-y-8">
+          <h2 className="text-3xl font-bold text-center mb-5">Add New Tutor</h2>
+            <form onSubmit={onSubmit} className="p-10 space-y-8 shadow-lg rounded-xl bg-gray-50 ">
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 

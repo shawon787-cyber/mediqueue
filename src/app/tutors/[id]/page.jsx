@@ -1,3 +1,5 @@
+
+
 import {
   IoBookOutline,
   IoLocationOutline,
@@ -8,6 +10,7 @@ import { PiStudent } from "react-icons/pi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { RiVideoChatLine } from "react-icons/ri"; 
 import Link from "next/link";
+import BookButton from "@/componenets/BookButton";
 
 const TutorDetailsPage = async ({ params }) => {
   
@@ -116,9 +119,7 @@ const TutorDetailsPage = async ({ params }) => {
             Total Available Slots: <span className="font-bold text-gray-700">{tutor.totalSlot || 0}</span>
           </p>
 
-          <button className="w-full mt-6 bg-[#0675C1] text-white py-3 rounded-xl font-bold hover:bg-[#0564a4] transition-all shadow-lg shadow-blue-100">
-            Book Now
-          </button>
+          <BookButton tutor={tutor} />
         </div>
       </div>
     </div>
