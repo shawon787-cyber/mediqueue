@@ -2,84 +2,81 @@
 
 import PrivateRoute from "@/components/PrivateRoute";
 import { authClient } from "@/lib/auth-client";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useTheme } from "@/components/ThemeContext";
+import { fetchBookings, updateBookingStatus } from "@/lib/api";
 
 export default function MyBookedSession() {
   const { data: session } = authClient.useSession();
-
   const [bookings, setBookings] = useState([]);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (!session?.user?.email) return;
-
-    fetch(
-      `http://localhost:5000/bookings/${session.user.email}`
-    )
-      .then((res) => res.json())
-      .then((data) => setBookings(data.data));
+    fetchBookings(session.user.email).then((data) => {
+      if (data.success) {
+        setBookings(data.data || []);
+      }
+    });
   }, [session]);
 
-  // ✅ Confirm Booking
   const handleConfirm = async (id) => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/bookings/confirm/${id}`,
-        {
-          method: "PATCH",
-        }
+    const data = await updateBookingStatus(id, "Confirmed");
+    if (data.success) {
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking._id === id
+            ? { ...booking, status: "Confirmed" }
+            : booking
+        )
       );
-
-      const data = await res.json();
-
-      if (data.success) {
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === id
-              ? { ...booking, status: "Confirmed" }
-              : booking
-          )
-        );
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
-  // ❌ Cancel Booking
   const handleCancel = async (id) => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/bookings/${id}`,
-        {
-          method: "PATCH",
-        }
+    const data = await updateBookingStatus(id, "Cancelled");
+    if (data.success) {
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking._id === id
+            ? { ...booking, status: "Cancelled" }
+            : booking
+        )
       );
-
-      const data = await res.json();
-
-      if (data.success) {
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking._id === id
-              ? { ...booking, status: "Cancelled" }
-              : booking
-          )
-        );
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
   return (
     <PrivateRoute>
-      <div className="container mx-auto px-4 py-10">
-        <h1 className="text-5xl font-bold mb-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="container mx-auto px-4 py-10"
+      >
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`text-5xl font-bold mb-8 ${
+            isDark ? "text-white" : "text-gray-900"
+          }`}
+        >
           My Booked Sessions
-        </h1>
+        </motion.h1>
 
-        <div className="overflow-x-auto bg-white rounded-3xl shadow">
-          <table className="table">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className={`overflow-x-auto rounded-3xl shadow ${
+            isDark ? "bg-[#111827]" : "bg-white"
+          }`}
+        >
+          <table
+            className={`table ${
+              isDark ? "text-gray-200" : "text-gray-900"
+            }`}
+          >
             <thead>
               <tr>
                 <th>Tutor</th>
@@ -95,11 +92,8 @@ export default function MyBookedSession() {
               {bookings.map((booking) => (
                 <tr key={booking._id}>
                   <td>{booking.tutorName}</td>
-
                   <td>{booking.studentName}</td>
-
                   <td>{booking.studentEmail}</td>
-
                   <td>
                     {booking.status === "Pending" && (
                       <span className="badge badge-info">
@@ -157,8 +151,8 @@ export default function MyBookedSession() {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </PrivateRoute>
   );
 }

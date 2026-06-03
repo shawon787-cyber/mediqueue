@@ -6,14 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "patch-package"
+    "lint": "eslint"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.6.13",
     "@heroui/react": "^3.1.0",
     "@heroui/styles": "^3.1.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "axios": "^1.16.1",
     "better-auth": "^1.6.13",
     "daisyui": "^5.5.19",
@@ -27,7 +28,8 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.6.0",
     "react-toastify": "^11.1.0",
-    "swiper": "^12.1.4"
+    "swiper": "^12.1.4",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

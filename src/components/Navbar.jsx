@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
+import { useTheme } from "@/components/ThemeContext";
 
 export default function Navbar() {
+  const { theme } = useTheme();
   const { data: session } = authClient.useSession();
-  const user = session?.user;
+  const [mounted, setMounted] = useState(false);
+  const user = mounted ? session?.user : null;
 
   const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -26,37 +33,38 @@ export default function Navbar() {
   const navLinks = (
     <>
       <li>
-        <Link href="/">Home</Link>
+        <Link href="/" className="font-medium">Home</Link>
       </li>
-
       <li>
-        <Link href="/tutors">Tutors</Link>
+        <Link href="/tutors" className="font-medium">Tutors</Link>
       </li>
-
-       {user && (
-      <>
-        <li>
-          <Link href="/add-tutor">Add Tutor</Link>
-        </li>
-
-        <li>
-          <Link href="/MyTutors">My Tutors</Link>
-        </li>
-
-        <li>
-          <Link href="/my-booked-session">
-            My Booked Sessions
-          </Link>
-        </li>
-      </>
-    )}
+      {user && (
+        <>
+          <li>
+            <Link href="/add-tutor" className="font-medium">Add Tutor</Link>
+          </li>
+          <li>
+            <Link href="/MyTutors" className="font-medium">My Tutors</Link>
+          </li>
+          <li>
+            <Link href="/my-booked-session" className="font-medium">
+              My Booked Sessions
+            </Link>
+          </li>
+        </>
+      )}
     </>
   );
 
   return (
-    <div className="w-full bg-base-100 shadow relative">
+    <header
+      className={`w-full shadow-sm relative z-50 transition-colors duration-400 ${
+        theme === "dark"
+          ? "bg-[#0f1623] border-b border-gray-800"
+          : "bg-base-100"
+      }`}
+    >
       <div className="navbar container mx-auto px-4 min-h-[4rem]">
-        {/* Logo */}
         <div className="flex-1">
           <Link href="/" className="flex items-center gap-2">
             <div
@@ -87,21 +95,29 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop Menu */}
         <div className="hidden lg:flex">
           <ul className="menu menu-horizontal px-1 gap-2">
             {navLinks}
           </ul>
         </div>
 
-        {/* Right Side */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-{user ? (
+          {user ? (
             <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center overflow-hidden">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar"
+              >
+                <div
+                  className={`w-10 rounded-full ring-2 ring-offset-2 flex items-center justify-center overflow-hidden ${
+                    theme === "dark"
+                      ? "ring-[#0675C1] ring-offset-[#0f1623]"
+                      : "ring-primary ring-offset-base-100"
+                  }`}
+                >
                   {user.image ? (
                     <img src={user.image} alt={user.name || "User"} />
                   ) : (
@@ -117,26 +133,29 @@ export default function Navbar() {
 
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow bg-base-100 rounded-box w-56"
+                className={`menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow rounded-box w-56 ${
+                  theme === "dark"
+                    ? "bg-[#111827] border border-gray-700 text-gray-200"
+                    : "bg-base-100"
+                }`}
               >
                 <li className="menu-title">
                   <span>{user.name}</span>
                 </li>
-
                 <li>
                   <Link href="/profile">Profile</Link>
                 </li>
-
                 <li>
-                  <button onClick={handleLogout}>
-                    Logout
-                  </button>
+                  <button onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
             </div>
           ) : (
             <div className="hidden md:flex gap-2">
-              <Link href="/sign-up" className="btn btn-sm">
+              <Link
+                href="/sign-up"
+                className={`btn btn-sm ${theme === "dark" ? "btn-ghost text-gray-200" : ""}`}
+              >
                 Register
               </Link>
 
@@ -149,11 +168,12 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile Menu Button */}
           <div className="lg:hidden">
             <button
               onClick={() => setOpen(!open)}
-              className="btn btn-square btn-ghost"
+              className={`btn btn-square btn-ghost ${
+                theme === "dark" ? "text-gray-200" : ""
+              }`}
             >
               ☰
             </button>
@@ -161,9 +181,14 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {open && (
-        <div className="absolute top-16 left-0 w-full bg-base-100 shadow-lg lg:hidden z-50 border-t border-base-200">
+        <div
+          className={`absolute top-16 left-0 w-full shadow-lg lg:hidden z-50 border-t ${
+            theme === "dark"
+              ? "bg-[#0f1623] border-gray-800"
+              : "bg-base-100 border-base-200"
+          }`}
+        >
           <ul className="menu p-4 gap-2">
             {navLinks}
 
@@ -172,15 +197,11 @@ export default function Navbar() {
                 <li className="menu-title">
                   <span>{user.name}</span>
                 </li>
-
                 <li>
                   <Link href="/profile">Profile</Link>
                 </li>
-
                 <li>
-                  <button onClick={handleLogout}>
-                    Logout
-                  </button>
+                  <button onClick={handleLogout}>Logout</button>
                 </li>
               </>
             ) : (
@@ -188,7 +209,6 @@ export default function Navbar() {
                 <li>
                   <Link href="/sign-up">Register</Link>
                 </li>
-
                 <li>
                   <Link href="/Login">Login</Link>
                 </li>
@@ -197,6 +217,6 @@ export default function Navbar() {
           </ul>
         </div>
       )}
-    </div>
+    </header>
   );
 }

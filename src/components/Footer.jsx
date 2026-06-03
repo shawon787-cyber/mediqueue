@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
     FaXTwitter,
@@ -6,11 +8,17 @@ import {
     FaEnvelope,
     FaLocationDot
 } from "react-icons/fa6";
+import { useTheme } from "./ThemeContext";
 
 const Footer = () => {
+    const { theme } = useTheme();
 
     return (
-        <footer className="w-full bg-[#f8fafc] text-slate-600 pt-16 pb-8 border-t border-slate-200">
+        <footer className={`w-full pt-16 pb-8 transition-colors duration-400 border-t ${
+            theme === "dark"
+                ? "bg-[#0f1623] border-gray-800 text-gray-300"
+                : "bg-[#f8fafc] border-slate-200 text-slate-600"
+        }`}>
             <div className="container mx-auto px-6">
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-16">
@@ -35,12 +43,16 @@ const Footer = () => {
                                 </svg>
                             </div>
 
-                            <span className="text-2xl font-bold text-slate-800 tracking-tight">
+                            <span className={`text-2xl font-bold tracking-tight ${
+                                theme === "dark" ? "text-white" : "text-slate-800"
+                            }`}>
                                 MediQueue
                             </span>
                         </div>
 
-                        <p className="text-base leading-relaxed max-w-sm">
+                        <p className={`text-base leading-relaxed max-w-sm ${
+                            theme === "dark" ? "text-gray-400" : ""
+                        }`}>
                             Find the right medical tutor for your goals.
                             Book live medical sessions in any subject,
                             online or in person.
@@ -49,7 +61,9 @@ const Footer = () => {
 
                     {/* Services */}
                     <div className="md:col-span-3">
-                        <h4 className="text-slate-900 font-bold mb-5">
+                        <h4 className={`font-bold mb-5 ${
+                            theme === "dark" ? "text-white" : "text-slate-900"
+                        }`}>
                             Services
                         </h4>
 
@@ -85,7 +99,9 @@ const Footer = () => {
 
                     {/* Contact */}
                     <div className="md:col-span-4">
-                        <h4 className="text-slate-900 font-bold mb-5">
+                        <h4 className={`font-bold mb-5 ${
+                            theme === "dark" ? "text-white" : "text-slate-900"
+                        }`}>
                             Contact
                         </h4>
 
@@ -125,7 +141,9 @@ const Footer = () => {
 
                 {/* Bottom */}
                 <div className="pt-8 border-t border-slate-200 text-center">
-                    <p className="text-sm text-slate-400 font-medium">
+                    <p className={`text-sm font-medium ${
+                        theme === "dark" ? "text-gray-500" : "text-slate-400"
+                    }`}>
                         Copyright © {new Date().getFullYear()} MediQueue.
                         All rights reserved.
                     </p>

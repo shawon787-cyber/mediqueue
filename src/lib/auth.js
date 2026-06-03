@@ -19,14 +19,12 @@ export const auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       allowSignUp: true,
-      disableDefaultSignUp: false,
     },
   },
 
   accountLinking: {
     enabled: true,
-    allowPartialAccountLinking: true,
-    autoLinkAccounts: true,
+    trustedProviders: ["google"],
   },
 
   secret: process.env.BETTER_AUTH_SECRET,

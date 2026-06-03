@@ -3,9 +3,12 @@
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeContext";
+import { createBooking } from "@/lib/api";
 
 export default function BookButton({ tutor, slots, setSlots }) {
   const { data: session } = authClient.useSession();
+  const { isDark } = useTheme();
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -28,34 +31,26 @@ export default function BookButton({ tutor, slots, setSlots }) {
 
     setLoading(true);
 
-    try {
-      const res = await fetch("http://127.0.0.1:5000/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tutorId: tutor._id,
-          tutorName: tutor.tutorName,
-          studentName: session.user.name,
-          studentEmail: session.user.email,
-          phone,
-        }),
-      });
+try {
+       const data = await createBooking({
+         tutorId: tutor._id,
+         tutorName: tutor.tutorName,
+         studentName: session.user.name,
+         studentEmail: session.user.email,
+         phone,
+       });
 
-      const data = await res.json();
+if (data.success) {
+         toast.success("Booked successfully");
 
-      if (res.ok && data.success) {
-        toast.success("Booked successfully");
+         // optimistic UI update
+         setSlots((prev) => Math.max(prev - 1, 0));
 
-        // optimistic UI update
-        setSlots((prev) => Math.max(prev - 1, 0));
-
-        setShowModal(false);
-        setPhone("");
-      } else {
-        toast.error(data.message || "Booking failed");
-      }
+         setShowModal(false);
+         setPhone("");
+       } else {
+         toast.error(data.message || "Booking failed");
+       }
     } catch (error) {
       console.error(error);
       toast.error("Server error. Try again later");
@@ -82,7 +77,13 @@ export default function BookButton({ tutor, slots, setSlots }) {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[9999] p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div
+            className={`rounded-xl shadow-xl w-full max-w-md p-6 ${
+              isDark
+                ? "bg-[#111827] text-gray-200"
+                : "bg-white text-gray-900"
+            }`}
+          >
             <h2 className="text-2xl font-bold mb-5 text-center">
               Book Session
             </h2>
@@ -91,63 +92,109 @@ export default function BookButton({ tutor, slots, setSlots }) {
               {/* Student Name */}
               <div className="mb-3">
                 <label className="label">
-                  <span className="label-text">Student Name</span>
+                  <span
+                    className={`label-text ${
+                      isDark ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Student Name
+                  </span>
                 </label>
 
                 <input
                   type="text"
                   value={session?.user?.name || ""}
                   readOnly
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    isDark
+                      ? "bg-[#1a2235] border-gray-700 text-white"
+                      : ""
+                  }`}
                 />
               </div>
 
               {/* Student Email */}
               <div className="mb-3">
                 <label className="label">
-                  <span className="label-text">Student Email</span>
+                  <span
+                    className={`label-text ${
+                      isDark ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Student Email
+                  </span>
                 </label>
 
                 <input
                   type="email"
                   value={session?.user?.email || ""}
                   readOnly
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    isDark
+                      ? "bg-[#1a2235] border-gray-700 text-white"
+                      : ""
+                  }`}
                 />
               </div>
 
               {/* Tutor Name */}
               <div className="mb-3">
                 <label className="label">
-                  <span className="label-text">Tutor Name</span>
+                  <span
+                    className={`label-text ${
+                      isDark ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Tutor Name
+                  </span>
                 </label>
 
                 <input
                   type="text"
                   value={tutor.tutorName}
                   readOnly
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    isDark
+                      ? "bg-[#1a2235] border-gray-700 text-white"
+                      : ""
+                  }`}
                 />
               </div>
 
               {/* Tutor ID */}
               <div className="mb-3">
                 <label className="label">
-                  <span className="label-text">Tutor ID</span>
+                  <span
+                    className={`label-text ${
+                      isDark ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Tutor ID
+                  </span>
                 </label>
 
                 <input
                   type="text"
                   value={tutor._id}
                   readOnly
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    isDark
+                      ? "bg-[#1a2235] border-gray-700 text-white"
+                      : ""
+                  }`}
                 />
               </div>
 
               {/* Phone */}
               <div className="mb-5">
                 <label className="label">
-                  <span className="label-text">Phone Number</span>
+                  <span
+                    className={`label-text ${
+                      isDark ? "text-gray-300" : ""
+                    }`}
+                  >
+                    Phone Number
+                  </span>
                 </label>
 
                 <input
@@ -155,7 +202,11 @@ export default function BookButton({ tutor, slots, setSlots }) {
                   placeholder="01XXXXXXXXX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    isDark
+                      ? "bg-[#1a2235] border-gray-700 text-white placeholder-gray-500"
+                      : ""
+                  }`}
                   required
                 />
               </div>
@@ -176,7 +227,11 @@ export default function BookButton({ tutor, slots, setSlots }) {
                     setShowModal(false);
                     setPhone("");
                   }}
-                  className="btn btn-outline flex-1"
+                  className={`btn btn-outline flex-1 ${
+                    isDark
+                      ? "btn-outline text-gray-200 border-gray-600"
+                      : ""
+                  }`}
                 >
                   Cancel
                 </button>

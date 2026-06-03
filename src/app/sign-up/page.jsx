@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeContext";
 
 const validatePassword = (password) => {
   if (!password) return "Password is required.";
@@ -20,6 +21,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const { isDark } = useTheme();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -67,31 +69,43 @@ export default function SignUpPage() {
     });
 
     if (error) {
-      const message = error.message || "Google sign in failed";
+      const message = error.message || error.code || "Google sign in failed";
       toast.error(message);
+      return;
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
-
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-
+    <div
+      className={`min-h-screen flex items-center justify-center px-4 ${
+        isDark ? "bg-[#0b0f1a]" : "bg-base-200"
+      }`}
+    >
+      <div
+        className={`card w-full max-w-md shadow-xl ${
+          isDark ? "bg-[#111827] text-gray-200" : "bg-base-100"
+        }`}
+      >
         <div className="card-body">
-
-          {/* Header */}
           <div className="text-center mb-4">
-            <h1 className="text-3xl font-bold">Register</h1>
-            <p className="text-sm opacity-70">
+            <h1
+              className={`text-3xl font-bold ${
+                isDark ? "text-[#67aefb]" : ""
+              }`}
+            >
+              Register
+            </h1>
+            <p
+              className={`text-sm ${
+                isDark ? "text-gray-400" : "opacity-70"
+              }`}
+            >
               Create your account to continue
             </p>
           </div>
 
-          {/* Errors */}
           {formError && (
-            <div className="alert alert-error py-2 text-sm">
-              {formError}
-            </div>
+            <div className="alert alert-error py-2 text-sm">{formError}</div>
           )}
 
           {passwordError && (
@@ -100,27 +114,31 @@ export default function SignUpPage() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={onSubmit} className="space-y-3">
-
             <input
               name="name"
               placeholder="Name"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full ${
+                isDark ? "bg-[#1a2235] border-gray-700 text-white placeholder-gray-500" : ""
+              }`}
               required
             />
 
             <input
               name="image"
               placeholder="Photo URL"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full ${
+                isDark ? "bg-[#1a2235] border-gray-700 text-white placeholder-gray-500" : ""
+              }`}
             />
 
             <input
               name="email"
               placeholder="Email"
               type="email"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full ${
+                isDark ? "bg-[#1a2235] border-gray-700 text-white placeholder-gray-500" : ""
+              }`}
               required
             />
 
@@ -128,7 +146,9 @@ export default function SignUpPage() {
               name="password"
               placeholder="Password"
               type="password"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full ${
+                isDark ? "bg-[#1a2235] border-gray-700 text-white placeholder-gray-500" : ""
+              }`}
               required
             />
 
@@ -142,10 +162,8 @@ export default function SignUpPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="divider">OR</div>
 
-          {/* Google */}
           <button
             type="button"
             onClick={handleGoogleAuth}
@@ -165,14 +183,12 @@ export default function SignUpPage() {
             Continue with Google
           </button>
 
-          {/* Login */}
           <p className="text-center text-sm mt-4">
             Already have an account?{" "}
             <a href="/Login" className="link link-primary">
               Login
             </a>
           </p>
-
         </div>
       </div>
     </div>
