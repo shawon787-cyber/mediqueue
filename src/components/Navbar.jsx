@@ -9,7 +9,6 @@ import { authClient } from "@/lib/auth-client";
 export default function Navbar() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
-  console.log("Current user:", user);
 
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -99,18 +98,20 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {user ?  (
+{user ? (
             <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle avatar"
-              >
-                <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img
-                    src={user.image || "/default-avatar.png"}
-                    alt={user.name || "User"}
-                  />
+              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center overflow-hidden">
+                  {user.image ? (
+                    <img src={user.image} alt={user.name || "User"} />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center text-white text-lg font-semibold"
+                      style={{ backgroundColor: "#0675C1" }}
+                    >
+                      {(user.email?.[0] || user.name?.[0] || "U").toUpperCase()}
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -1,4 +1,5 @@
 "use client";
+
 import PrivateRoute from "@/components/PrivateRoute";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
@@ -18,82 +19,146 @@ export default function MyBookedSession() {
       .then((data) => setBookings(data.data));
   }, [session]);
 
-  const handleCancel = async (id) => {
-    await fetch(
-      `http://localhost:5000/bookings/${id}`,
-      {
-        method: "PATCH",
-      }
-    );
+  // ✅ Confirm Booking
+  const handleConfirm = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/bookings/confirm/${id}`,
+        {
+          method: "PATCH",
+        }
+      );
 
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking._id === id
-          ? { ...booking, status: "Cancelled" }
-          : booking
-      )
-    );
+      const data = await res.json();
+
+      if (data.success) {
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking._id === id
+              ? { ...booking, status: "Confirmed" }
+              : booking
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ❌ Cancel Booking
+  const handleCancel = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/bookings/${id}`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking._id === id
+              ? { ...booking, status: "Cancelled" }
+              : booking
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <PrivateRoute>
       <div className="container mx-auto px-4 py-10">
-      <h1 className="text-5xl font-bold mb-8">
-        My Booked Sessions
-      </h1>
+        <h1 className="text-5xl font-bold mb-8">
+          My Booked Sessions
+        </h1>
 
-      <div className="overflow-x-auto bg-white rounded-3xl shadow">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Tutor</th>
-              <th>Student</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking._id}>
-                <td>{booking.tutorName}</td>
-
-                <td>{booking.studentName}</td>
-
-                <td>{booking.studentEmail}</td>
-
-                <td>
-                  
-                  {booking.status === "Pending" ? (
-                    <span className="badge badge-info">
-                      Pending
-                    </span>
-                  ) : (
-                    <span className="badge badge-error">
-                      Cancelled
-                    </span>
-                  )}
-                </td>
-
-                <td>
-                  <button
-                    disabled={booking.status === "Cancelled"}
-                    onClick={() => handleCancel(booking._id)}
-                    className="btn btn-sm btn-error"
-                  >
-                    {booking.status === "Cancelled"
-                      ? "Cancelled"
-                      : "Cancel"}
-                  </button>
-                </td>
+        <div className="overflow-x-auto bg-white rounded-3xl shadow">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Tutor</th>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Confirm</th>
+                <th>Cancel</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {bookings.map((booking) => (
+                <tr key={booking._id}>
+                  <td>{booking.tutorName}</td>
+
+                  <td>{booking.studentName}</td>
+
+                  <td>{booking.studentEmail}</td>
+
+                  <td>
+                    {booking.status === "Pending" && (
+                      <span className="badge badge-info">
+                        Pending
+                      </span>
+                    )}
+
+                    {booking.status === "Confirmed" && (
+                      <span className="badge badge-success">
+                        Confirmed
+                      </span>
+                    )}
+
+                    {booking.status === "Cancelled" && (
+                      <span className="badge badge-error">
+                        Cancelled
+                      </span>
+                    )}
+                  </td>
+
+                  <td>
+                    <button
+                      disabled={
+                        booking.status === "Confirmed" ||
+                        booking.status === "Cancelled"
+                      }
+                      onClick={() =>
+                        handleConfirm(booking._id)
+                      }
+                      className="btn btn-sm btn-success"
+                    >
+                      {booking.status === "Confirmed"
+                        ? "Confirmed"
+                        : "Confirm"}
+                    </button>
+                  </td>
+
+                  <td>
+                    <button
+                      disabled={
+                        booking.status === "Cancelled" ||
+                        booking.status === "Confirmed"
+                      }
+                      onClick={() =>
+                        handleCancel(booking._id)
+                      }
+                      className="btn btn-sm btn-error"
+                    >
+                      {booking.status === "Cancelled"
+                        ? "Cancelled"
+                        : "Cancel"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
     </PrivateRoute>
-    
   );
 }

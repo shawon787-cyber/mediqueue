@@ -42,8 +42,10 @@ export default function LoginPage() {
     });
 
     if (error) {
-      const message = error.message || "Google sign in failed";
+      const message = error.message || error.code || "Google sign in failed";
+      setFormError(message);
       toast.error(message);
+      return;
     }
   };
 
