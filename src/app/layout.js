@@ -25,7 +25,10 @@ export default function RootLayout({ children }) {
             <Navbar />
             <main className="relative z-10 flex-grow w-full">
               {children}
-              <ToastContainer position="top-right" style={{ zIndex: 99999 }} />
+              <div className="fixed top-4 right-4 z-9999">
+                <ToastContainer position="top-right" />
+              </div>
+              
             </main>
             <Footer />
             <DarkBackground />

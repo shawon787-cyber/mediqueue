@@ -69,7 +69,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`w-full shadow-sm relative z-50 transition-colors duration-400 ${
+      className={`w-full shadow relative transition-colors duration-400 ${
         theme === "dark"
           ? "bg-[#0f1623] border-b border-gray-800"
           : "bg-base-100"
@@ -160,7 +160,7 @@ export default function Navbar() {
                   <span>{user.name}</span>
                 </li>
                 <li>
-                  <Link href="/profile">Profile</Link>
+                  <Link href="/my-booked-session">My Booked Sessions</Link>
                 </li>
                 <li>
                   <button onClick={handleLogout}>Logout</button>
@@ -215,7 +215,7 @@ export default function Navbar() {
                   <span>{user.name}</span>
                 </li>
                 <li>
-                  <Link href="/profile">Profile</Link>
+                  <Link href="/my-booked-session">My Booked Sessions</Link>
                 </li>
                 <li>
                   <button onClick={handleLogout}>Logout</button>
