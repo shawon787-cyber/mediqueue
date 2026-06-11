@@ -15,7 +15,7 @@ if (process.env.MONGODB_URI) {
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 
-  database: mongodbAdapter(client.db("mediquee")),
+  ...(client ? { database: mongodbAdapter(client.db("mediquee")) } : {}),
 
   emailAndPassword: {
     enabled: true,
