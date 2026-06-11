@@ -2,13 +2,20 @@ import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
-const client = new MongoClient(process.env.MONGODB_URI);
-client.connect(); 
+let client;
+let clientPromise;
+
+if (process.env.MONGODB_URI) {
+  client = new MongoClient(process.env.MONGODB_URI);
+  clientPromise = client.connect();
+} else {
+  clientPromise = Promise.resolve(null);
+}
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 
-  database: mongodbAdapter(client.db("mediquee")), 
+  database: mongodbAdapter(client.db("mediquee")),
 
   emailAndPassword: {
     enabled: true,

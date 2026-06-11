@@ -1,16 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { useTheme } from "@/components/ThemeContext";
+import { isAuthenticated } from "@/lib/api";
 
 export default function BookingDetailsButton({ tutorId }) {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
   const { isDark } = useTheme();
 
   const handleBookSession = () => {
-    if (session) {
+    if (isAuthenticated()) {
       router.push(`/tutors/${tutorId}`);
     } else {
       router.push("/sign-up");

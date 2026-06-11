@@ -1,29 +1,32 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/components/ThemeContext";
+import { createBooking, isAuthenticated, getUser } from "@/lib/api";
 import { toast } from "react-toastify";
 import { useState } from "react";
-import { useTheme } from "@/components/ThemeContext";
-import { createBooking } from "@/lib/api";
 
 export default function BookButton({ tutor, slots, setSlots }) {
-  const { data: session } = authClient.useSession();
+  const router = useRouter();
   const { isDark } = useTheme();
+  const user = getUser();
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [phone, setPhone] = useState("");
 
+  const currentDate = new Date();
+  const sessionStartDate = tutor.sessionStartDate ? new Date(tutor.sessionStartDate) : null;
+  const isBookingAvailable = sessionStartDate && currentDate >= sessionStartDate;
+
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    // auth check
-    if (!session?.user) {
+    if (!isAuthenticated() || !user) {
       toast.error("Please login first");
       return;
     }
 
-    // phone validation
     if (!phone) {
       toast.error("Phone number required");
       return;
@@ -31,26 +34,23 @@ export default function BookButton({ tutor, slots, setSlots }) {
 
     setLoading(true);
 
-try {
-       const data = await createBooking({
-         tutorId: tutor._id,
-         tutorName: tutor.tutorName,
-         studentName: session.user.name,
-         studentEmail: session.user.email,
-         phone,
-       });
+    try {
+      const data = await createBooking({
+        tutorId: tutor._id,
+        tutorName: tutor.tutorName,
+        studentName: user.name,
+        studentEmail: user.email,
+        phone,
+      });
 
-if (data.success) {
-         toast.success("Booked successfully");
-
-         // optimistic UI update
-         setSlots((prev) => Math.max(prev - 1, 0));
-
-         setShowModal(false);
-         setPhone("");
-       } else {
-         toast.error(data.message || "Booking failed");
-       }
+      if (data.success) {
+        toast.success("Booked successfully");
+        setSlots((prev) => Math.max(prev - 1, 0));
+        setShowModal(false);
+        setPhone("");
+      } else {
+        toast.error(data.message || "Booking failed");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Server error. Try again later");
@@ -59,14 +59,27 @@ if (data.success) {
     }
   };
 
+  const handleBookSession = () => {
+    if (isAuthenticated()) {
+      router.push(`/tutors/${tutor._id}`);
+    } else {
+      router.push("/sign-up");
+    }
+  };
+
   return (
     <>
-      {/* BOOK BUTTON */}
+      {!isBookingAvailable && (
+        <p className="text-center text-red-500 font-medium mb-4">
+          Booking is not available yet for this tutor
+        </p>
+      )}
+
       <button
-        onClick={() => setShowModal(true)}
-        disabled={loading}
+        onClick={() => isBookingAvailable && setShowModal(true)}
+        disabled={loading || !isBookingAvailable || slots <= 0}
         className={`w-full mt-6 py-3 rounded-xl font-bold transition ${
-          loading
+          loading || !isBookingAvailable || slots <= 0
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-[#0675C1] hover:bg-[#0564a4] text-white"
         }`}
@@ -74,7 +87,6 @@ if (data.success) {
         {slots <= 0 ? "No Slots Available" : "Book Now"}
       </button>
 
-      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[9999] p-4">
           <div
@@ -89,7 +101,6 @@ if (data.success) {
             </h2>
 
             <form onSubmit={handleBooking}>
-              {/* Student Name */}
               <div className="mb-3">
                 <label className="label">
                   <span
@@ -103,7 +114,7 @@ if (data.success) {
 
                 <input
                   type="text"
-                  value={session?.user?.name || ""}
+                  value={user?.name || ""}
                   readOnly
                   className={`input input-bordered w-full ${
                     isDark
@@ -113,7 +124,6 @@ if (data.success) {
                 />
               </div>
 
-              {/* Student Email */}
               <div className="mb-3">
                 <label className="label">
                   <span
@@ -127,7 +137,7 @@ if (data.success) {
 
                 <input
                   type="email"
-                  value={session?.user?.email || ""}
+                  value={user?.email || ""}
                   readOnly
                   className={`input input-bordered w-full ${
                     isDark
@@ -137,7 +147,6 @@ if (data.success) {
                 />
               </div>
 
-              {/* Tutor Name */}
               <div className="mb-3">
                 <label className="label">
                   <span
@@ -161,7 +170,6 @@ if (data.success) {
                 />
               </div>
 
-              {/* Tutor ID */}
               <div className="mb-3">
                 <label className="label">
                   <span
@@ -185,7 +193,6 @@ if (data.success) {
                 />
               </div>
 
-              {/* Phone */}
               <div className="mb-5">
                 <label className="label">
                   <span
@@ -211,7 +218,6 @@ if (data.success) {
                 />
               </div>
 
-              {/* ACTION BUTTONS */}
               <div className="flex gap-3">
                 <button
                   type="submit"

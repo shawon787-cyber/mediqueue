@@ -156,3 +156,16 @@ body {
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+[data-hot-toast] {
+  z-index: 2147483647 !important;
+}
+
+.Toastify__toast-container {
+  z-index: 2147483647 !important;
+  
+}
+
+.Toastify__toast {
+  z-index: 2147483647 !important;
+}

@@ -1,33 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
-import { authClient } from "@/lib/auth-client";
 import { useTheme } from "@/components/ThemeContext";
+import { isAuthenticated, getUser } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
 
 export default function Navbar() {
   const { theme } = useTheme();
-  const { data: session } = authClient.useSession();
-  const [mounted, setMounted] = useState(false);
-  const user = mounted ? session?.user : null;
-
-  const [open, setOpen] = useState(false);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { data: session } = authClient.useSession();
+
+  const localUser = useMemo(() => getUser(), []);
+  const isLocalAuth = useMemo(() => isAuthenticated(), []);
+
+  const sessionUser = useMemo(() => {
+    if (!session?.user) return null;
+    return {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image,
+    };
+  }, [session]);
+
+  const authenticated = Boolean(sessionUser) || isLocalAuth;
+  const user = sessionUser || localUser;
 
   const handleLogout = async () => {
-    try {
-      await authClient.signOut();
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("betterAuthSession");
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
   };
 
   const navLinks = (
@@ -38,7 +49,7 @@ export default function Navbar() {
       <li>
         <Link href="/tutors" className="font-medium">Tutors</Link>
       </li>
-      {user && (
+      {authenticated && user && (
         <>
           <li>
             <Link href="/add-tutor" className="font-medium">Add Tutor</Link>
@@ -64,7 +75,7 @@ export default function Navbar() {
           : "bg-base-100"
       }`}
     >
-      <div className="navbar container mx-auto px-4 min-h-[4rem]">
+      <div className="navbar container mx-auto px-4 min-h-16">
         <div className="flex-1">
           <Link href="/" className="flex items-center gap-2">
             <div
@@ -104,7 +115,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {user ? (
+          {authenticated && user ? (
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -119,7 +130,13 @@ export default function Navbar() {
                   }`}
                 >
                   {user.image ? (
-                    <img src={user.image} alt={user.name || "User"} />
+                    <Image
+                      src={user.image}
+                      alt={user.name || "User"}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <div
                       className="w-full h-full flex items-center justify-center text-white text-lg font-semibold"
@@ -133,7 +150,7 @@ export default function Navbar() {
 
               <ul
                 tabIndex={0}
-                className={`menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow rounded-box w-56 ${
+                className={`menu menu-sm dropdown-content mt-3 z-100 p-2 shadow rounded-box w-56 ${
                   theme === "dark"
                     ? "bg-[#111827] border border-gray-700 text-gray-200"
                     : "bg-base-100"
@@ -192,7 +209,7 @@ export default function Navbar() {
           <ul className="menu p-4 gap-2">
             {navLinks}
 
-            {user ? (
+            {authenticated && user ? (
               <>
                 <li className="menu-title">
                   <span>{user.name}</span>

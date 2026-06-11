@@ -1,16 +1,16 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function PrivateRoute({ children }) {
-  const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.push("/login");
+      router.push("/Login");
     }
   }, [session, isPending, router]);
 
@@ -24,5 +24,5 @@ export default function PrivateRoute({ children }) {
 
   if (!session) return null;
 
-  return children;
+  return <>{children}</>;
 }

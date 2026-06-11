@@ -3,6 +3,21 @@ import ThemeDetailsClient from "./ThemeDetailsClient";
 import PrivateRoute from "@/components/PrivateRoute";
 import { fetchTutorById } from "@/lib/api";
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const data = await fetchTutorById(id);
+
+  if (!data?.success) {
+    return {
+      title: "Tutor Details",
+    };
+  }
+
+  return {
+    title: data.data?.tutorName || "Tutor Details",
+  };
+}
+
 export default async function TutorDetailsPage({ params }) {
   const { id } = await params;
 

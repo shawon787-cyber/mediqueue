@@ -61,5 +61,5 @@ export function ThemeProvider({ children }) {
     } catch {}
   }, []);
 
-  return children;
+  return <>{children}</>;
 }

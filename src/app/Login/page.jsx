@@ -6,39 +6,80 @@ import { useRouter } from "next/navigation";
 import { FaEnvelope, FaLock, FaGoogle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "react-toastify";
 import { useTheme } from "@/components/ThemeContext";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
   const [formError, setFormError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { isDark } = useTheme();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    setIsLoading(true);
 
-    const { error } = await authClient.signIn.email({ email, password });
-    if (error) {
+    const formData = new FormData(e.currentTarget);
+    const email = (formData.get("email") || "").trim();
+    const password = (formData.get("password") || "").trim();
+
+    if (!email || !password) {
+      const message = "Email and password are required";
+      setFormError(message);
+      toast.error(message);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.success === false) {
+        const message = data.message || "Invalid email or password";
+        setFormError(message);
+        toast.error(message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      toast.success("Login successful");
+      router.push("/");
+    } catch (error) {
       const message = error.message || "Login failed";
       setFormError(message);
       toast.error(message);
-      return;
+      setIsLoading(false);
     }
-    toast.success("Login successful");
-    router.push("/");
   };
 
   const handleGoogleAuth = async () => {
-    const { error } = await authClient.signIn.social({ provider: "google" });
-    if (error) {
-      const message = error.message || error.code || "Google sign in failed";
+    setFormError("");
+    try {
+      const { error } = await authClient.signIn.social({ provider: "google" });
+      if (error) {
+        const message = error.message || error.code || "Google sign in failed";
+        setFormError(message);
+        toast.error(message);
+      }
+    } catch (error) {
+      const message = error.message || "Google sign in failed";
       setFormError(message);
       toast.error(message);
-      return;
     }
   };
 
@@ -102,6 +143,7 @@ export default function LoginPage() {
                     : ""
                 }`}
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -130,6 +172,7 @@ export default function LoginPage() {
                     : ""
                 }`}
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -149,9 +192,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-[#045A94] text-white font-semibold hover:bg-[#044D80] transition"
+            disabled={isLoading}
+            className="w-full py-3 rounded-lg bg-[#045A94] text-white font-semibold hover:bg-[#044D80] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -178,7 +222,8 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={handleGoogleAuth}
-          className={`w-full border rounded-lg py-3 flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#1a2235] transition ${
+          disabled={isLoading}
+          className={`w-full border rounded-lg py-3 flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#1a2235] transition disabled:opacity-50 disabled:cursor-not-allowed ${
             isDark ? "border-gray-700" : ""
           }`}
         >

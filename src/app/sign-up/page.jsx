@@ -44,7 +44,7 @@ export default function SignUpPage() {
       return;
     }
 
-    const { error } = await authClient.signUp.email({
+    const { error, data } = await authClient.signUp.email({
       email,
       password,
       name,
@@ -58,9 +58,16 @@ export default function SignUpPage() {
       toast.error(error.message || "Signup failed");
       return;
     }
+    if (data?.token) {
+  localStorage.setItem("token", data.token);
+}
 
-    toast.success("Signup successful");
-    router.push("/Login");
+if (data?.user) {
+  localStorage.setItem("user", JSON.stringify(data.user));
+}
+
+    toast.success("Account created successfully");
+    router.push("/");
   };
 
   const handleGoogleAuth = async () => {
