@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
 const getAuthHeader = () => {
   if (typeof window === "undefined") return {};
@@ -44,27 +44,15 @@ export async function fetchTutors(search = "", startDate = "", endDate = "") {
   if (startDate) params.set("startDate", startDate);
   if (endDate) params.set("endDate", endDate);
 
-  const res = await fetch(`${API_BASE}/tutors?${params.toString()}`, {
+  return request(`${API_BASE}/tutors?${params.toString()}`, {
     cache: "no-store",
   });
-
-  if (res.status === 401 || res.status === 403) {
-    handleUnauthorized();
-  }
-
-  return res.json();
 }
 
 export async function fetchTutorById(id) {
-  const res = await fetch(`${API_BASE}/tutors/${id}`, {
+  return request(`${API_BASE}/tutors/${id}`, {
     cache: "no-store",
   });
-
-  if (res.status === 401 || res.status === 403) {
-    handleUnauthorized();
-  }
-
-  return res.json();
 }
 
 export async function createTutor(tutorData) {
@@ -96,13 +84,7 @@ export async function createBooking(bookingData) {
 
 export async function fetchBookings(email) {
   const url = email ? `${API_BASE}/bookings/${email}` : `${API_BASE}/bookings`;
-  const res = await fetch(url);
-
-  if (res.status === 401 || res.status === 403) {
-    handleUnauthorized();
-  }
-
-  return res.json();
+  return request(url, { method: "GET" });
 }
 
 export async function updateBookingStatus(id, status) {
@@ -118,16 +100,9 @@ export async function updateBookingStatus(id, status) {
 }
 
 export async function fetchMyTutors(email) {
-  const res = await fetch(`${API_BASE}/my-tutors/${email}`, {
+  return request(`${API_BASE}/my-tutors/${email}`, {
     cache: "no-store",
-    headers: getAuthHeader(),
   });
-
-  if (res.status === 401 || res.status === 403) {
-    handleUnauthorized();
-  }
-
-  return res.json();
 }
 
 export function getToken() {
