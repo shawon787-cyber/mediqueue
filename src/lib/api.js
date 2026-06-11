@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const getAuthHeader = () => {
   if (typeof window === "undefined") return {};
@@ -10,6 +10,7 @@ const getAuthHeader = () => {
 const handleUnauthorized = () => {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }
   window.location.href = "/Login";
 };
@@ -38,7 +39,7 @@ async function request(url, options = {}) {
   return res;
 }
 
-export async function fetchTutors(search = "", startDate = "", endDate = "") {
+export async function getTutors(search = "", startDate = "", endDate = "") {
   const params = new URLSearchParams();
   if (search) params.set("search", search);
   if (startDate) params.set("startDate", startDate);
@@ -48,6 +49,8 @@ export async function fetchTutors(search = "", startDate = "", endDate = "") {
     cache: "no-store",
   });
 }
+
+export const fetchTutors = getTutors;
 
 export async function fetchTutorById(id) {
   return request(`${API_BASE}/tutors/${id}`, {
@@ -99,11 +102,13 @@ export async function updateBookingStatus(id, status) {
   });
 }
 
-export async function fetchMyTutors(email) {
+export async function getMyTutors(email) {
   return request(`${API_BASE}/my-tutors/${email}`, {
     cache: "no-store",
   });
 }
+
+export const fetchMyTutors = getMyTutors;
 
 export function getToken() {
   return typeof window !== "undefined" ? localStorage.getItem("token") : null;
