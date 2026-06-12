@@ -6,7 +6,8 @@ import { FiTrash2, FiEdit2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useTheme } from "@/components/ThemeContext";
-import { fetchMyTutors, deleteTutor, updateTutor, getUser } from "@/lib/api";
+import { useAuth } from "@/lib/AuthProvider";
+import { fetchMyTutors, deleteTutor, updateTutor } from "@/lib/api";
 
 const MyTutorsPage = () => {
   const { isDark } = useTheme();
@@ -23,7 +24,7 @@ const MyTutorsPage = () => {
   sessionStartDate: "",
 });
 
-  const user = getUser();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user?.email) return;
@@ -32,8 +33,13 @@ const MyTutorsPage = () => {
         if (data.success) {
           setTutors(data.data || []);
         }
+      })
+      .catch((error) => {
+        if (error.message !== "Unauthorized") {
+          toast.error(error.message || "Failed to load tutors");
+        }
       });
-  }, [user]);
+  }, [user?.email]);
 
   const handleDeleteClick = (id) => {
     setSelectedId(id);
@@ -46,15 +52,19 @@ const MyTutorsPage = () => {
   };
 
   const confirmDelete = async () => {
-    const data = await deleteTutor(selectedId);
+    try {
+      const data = await deleteTutor(selectedId);
 
-    if (data.success) {
-      setTutors((prev) =>
-        prev.filter((t) => t._id !== selectedId)
-      );
-      toast.success("Tutor deleted successfully 🗑️");
-    } else {
-      toast.error("Delete failed ❌");
+      if (data.success) {
+        setTutors((prev) => prev.filter((t) => t._id !== selectedId));
+        toast.success("Tutor deleted successfully");
+      } else {
+        toast.error("Delete failed");
+      }
+    } catch (error) {
+      if (error.message !== "Unauthorized") {
+        toast.error(error.message || "Delete failed");
+      }
     }
 
     closeDeleteModal();
@@ -79,24 +89,30 @@ const handleUpdate = async (e) => {
 
   if (!editingTutor) return;
 
-  const data = await updateTutor(
-    editingTutor._id,
-    formData
-  );
-
-  if (data.success) {
-    setTutors((prev) =>
-      prev.map((tutor) =>
-        tutor._id === editingTutor._id
-          ? { ...tutor, ...formData }
-          : tutor
-      )
+  try {
+    const data = await updateTutor(
+      editingTutor._id,
+      formData
     );
 
-    toast.success("Tutor updated successfully");
-    setIsEditOpen(false);
-  } else {
-    toast.error("Update failed");
+    if (data.success) {
+      setTutors((prev) =>
+        prev.map((tutor) =>
+          tutor._id === editingTutor._id
+            ? { ...tutor, ...formData }
+            : tutor
+        )
+      );
+
+      toast.success("Tutor updated successfully");
+      setIsEditOpen(false);
+    } else {
+      toast.error("Update failed");
+    }
+  } catch (error) {
+    if (error.message !== "Unauthorized") {
+      toast.error(error.message || "Update failed");
+    }
   }
 };
 

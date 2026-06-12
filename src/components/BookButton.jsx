@@ -2,14 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeContext";
-import { createBooking, isAuthenticated, getUser } from "@/lib/api";
+import { useAuth } from "@/lib/AuthProvider";
+import { createBooking } from "@/lib/api";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
 export default function BookButton({ tutor, slots, setSlots }) {
   const router = useRouter();
   const { isDark } = useTheme();
-  const user = getUser();
+  const { user, isLoggedIn } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -22,8 +23,9 @@ export default function BookButton({ tutor, slots, setSlots }) {
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    if (!isAuthenticated() || !user) {
+    if (!isLoggedIn || !user) {
       toast.error("Please login first");
+      router.replace("/login");
       return;
     }
 
@@ -52,18 +54,15 @@ export default function BookButton({ tutor, slots, setSlots }) {
         toast.error(data.message || "Booking failed");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Server error. Try again later");
+      if (
+        error.message !== "Please login first" &&
+        error.message !== "Unauthorized"
+      ) {
+        console.error(error);
+        toast.error("Server error. Try again later");
+      }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleBookSession = () => {
-    if (isAuthenticated()) {
-      router.push(`/tutors/${tutor._id}`);
-    } else {
-      router.push("/sign-up");
     }
   };
 

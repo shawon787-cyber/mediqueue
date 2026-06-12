@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import { AuthProvider } from "@/lib/AuthProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ToastContainer } from "react-toastify";
@@ -20,20 +21,22 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body>
         <InitialLoader />
-        <ThemeProvider>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="relative z-10 flex-grow w-full">
-              {children}
-              <div className="fixed top-4 right-4 z-9999">
-                <ToastContainer position="top-right" />
-              </div>
-              
-            </main>
-            <Footer />
-            <DarkBackground />
-          </div>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="relative z-10 flex-grow w-full">
+                {children}
+                <div className="fixed top-4 right-4 z-9999">
+                  <ToastContainer position="top-right" />
+                </div>
+                
+              </main>
+              <Footer />
+              <DarkBackground />
+            </div>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

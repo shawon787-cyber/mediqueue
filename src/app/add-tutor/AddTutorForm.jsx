@@ -3,12 +3,12 @@
 import PrivateRoute from "@/components/PrivateRoute";
 import { toast } from "react-toastify";
 import { useTheme } from "@/components/ThemeContext";
+import { useAuth } from "@/lib/AuthProvider";
 import { createTutor } from "@/lib/api";
-import { getUser } from "@/lib/api";
 
 export default function AddTutorForm() {
   const { isDark } = useTheme();
-  const user = getUser();
+  const { user } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -23,13 +23,16 @@ export default function AddTutorForm() {
     try {
       const data = await createTutor(tutorData);
 
-      if (data.insertedId || data.acknowledged) {
+      if (data.insertedId || data.acknowledged || data.success) {
         toast.success("Tutor Added Successfully");
         e.target.reset();
+      } else {
+        toast.error(data.message || "Tutor add failed");
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
+      if (error.message !== "Unauthorized") {
+        toast.error(error.message || "Something went wrong");
+      }
     }
   };
 

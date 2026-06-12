@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+import LoginPage from "@/app/Login/LoginPage";
 
 export const metadata = {
   title: "Login",
 };
 
 export default function Page() {
-  redirect("/login");
+  return <LoginPage />;
 }

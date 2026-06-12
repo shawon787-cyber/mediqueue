@@ -1,49 +1,72 @@
 "use client";
 
 import PrivateRoute from "@/components/PrivateRoute";
-import { getUser } from "@/lib/api";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { useTheme } from "@/components/ThemeContext";
+import { useAuth } from "@/lib/AuthProvider";
 import { fetchBookings, updateBookingStatus } from "@/lib/api";
 
 export default function MyBookedSession() {
-  const user = getUser();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const { isDark } = useTheme();
 
   useEffect(() => {
     if (!user?.email) return;
-    fetchBookings(user.email).then((data) => {
-      if (data.success) {
-        setBookings(data.data || []);
-      }
-    });
-  }, [user]);
+    fetchBookings(user.email)
+      .then((data) => {
+        if (data.success) {
+          setBookings(data.data || []);
+        }
+      })
+      .catch((error) => {
+        if (error.message !== "Unauthorized") {
+          toast.error(error.message || "Failed to load bookings");
+        }
+      });
+  }, [user?.email]);
 
   const handleConfirm = async (id) => {
-    const data = await updateBookingStatus(id, "Confirmed");
-    if (data.success) {
-      setBookings((prev) =>
-        prev.map((booking) =>
-          booking._id === id
-            ? { ...booking, status: "Confirmed" }
-            : booking
-        )
-      );
+    try {
+      const data = await updateBookingStatus(id, "Confirmed");
+      if (data.success) {
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking._id === id
+              ? { ...booking, status: "Confirmed" }
+              : booking
+          )
+        );
+      } else {
+        toast.error("Confirm failed");
+      }
+    } catch (error) {
+      if (error.message !== "Unauthorized") {
+        toast.error(error.message || "Confirm failed");
+      }
     }
   };
 
   const handleCancel = async (id) => {
-    const data = await updateBookingStatus(id, "Cancelled");
-    if (data.success) {
-      setBookings((prev) =>
-        prev.map((booking) =>
-          booking._id === id
-            ? { ...booking, status: "Cancelled" }
-            : booking
-        )
-      );
+    try {
+      const data = await updateBookingStatus(id, "Cancelled");
+      if (data.success) {
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking._id === id
+              ? { ...booking, status: "Cancelled" }
+              : booking
+          )
+        );
+      } else {
+        toast.error("Cancel failed");
+      }
+    } catch (error) {
+      if (error.message !== "Unauthorized") {
+        toast.error(error.message || "Cancel failed");
+      }
     }
   };
 
@@ -96,21 +119,15 @@ export default function MyBookedSession() {
                   <td>{booking.studentEmail}</td>
                   <td>
                     {booking.status === "Pending" && (
-                      <span className="badge badge-info">
-                        Pending
-                      </span>
+                      <span className="badge badge-info">Pending</span>
                     )}
 
                     {booking.status === "Confirmed" && (
-                      <span className="badge badge-success">
-                        Confirmed
-                      </span>
+                      <span className="badge badge-success">Confirmed</span>
                     )}
 
                     {booking.status === "Cancelled" && (
-                      <span className="badge badge-error">
-                        Cancelled
-                      </span>
+                      <span className="badge badge-error">Cancelled</span>
                     )}
                   </td>
 
@@ -120,9 +137,7 @@ export default function MyBookedSession() {
                         booking.status === "Confirmed" ||
                         booking.status === "Cancelled"
                       }
-                      onClick={() =>
-                        handleConfirm(booking._id)
-                      }
+                      onClick={() => handleConfirm(booking._id)}
                       className="btn btn-sm btn-success"
                     >
                       {booking.status === "Confirmed"
@@ -137,9 +152,7 @@ export default function MyBookedSession() {
                         booking.status === "Cancelled" ||
                         booking.status === "Confirmed"
                       }
-                      onClick={() =>
-                        handleCancel(booking._id)
-                      }
+                      onClick={() => handleCancel(booking._id)}
                       className="btn btn-sm btn-error"
                     >
                       {booking.status === "Cancelled"

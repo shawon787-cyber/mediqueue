@@ -2,19 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import { useAuth } from "@/lib/AuthProvider";
 
-export default function PrivateRoute({ children }) {
-  const router = useRouter();
+export default function AuthRedirect({ children, destination = "/" }) {
   const { isLoggedIn, isHydrated } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    if (isHydrated && !isLoggedIn) {
-      toast.error("Please login first");
-      router.replace("/login");
+    if (isHydrated && isLoggedIn) {
+      router.replace(destination);
     }
-  }, [isHydrated, isLoggedIn, router]);
+  }, [destination, isHydrated, isLoggedIn, router]);
 
   if (!isHydrated) {
     return (
@@ -24,7 +22,7 @@ export default function PrivateRoute({ children }) {
     );
   }
 
-  if (!isLoggedIn) return null;
+  if (isLoggedIn) return null;
 
   return <>{children}</>;
 }

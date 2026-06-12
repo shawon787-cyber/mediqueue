@@ -1,42 +1,152 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const AUTH_CHANGED_EVENT = "auth-state-changed";
 
-const getAuthHeader = () => {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("token");
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+const showToast = async (type, message) => {
+  if (typeof window === "undefined") return;
+  const { toast } = await import("react-toastify");
+  toast[type](message);
 };
 
-const handleUnauthorized = () => {
+const dispatchAuthChanged = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
+  }
+};
+
+export function getToken() {
+  return typeof window !== "undefined" ? localStorage.getItem("token") : null;
+}
+
+export function getUser() {
+  if (typeof window === "undefined") return null;
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
+
+  try {
+    return JSON.parse(userStr);
+  } catch {
+    localStorage.removeItem("user");
+    return null;
+  }
+}
+
+export function isAuthenticated() {
+  return typeof window !== "undefined" ? !!localStorage.getItem("token") : false;
+}
+
+export function setAuthStorage(token, user) {
+  if (typeof window === "undefined") return;
+
+  if (token !== undefined) {
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }
+
+  if (user !== undefined) {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }
+
+  dispatchAuthChanged();
+}
+
+export function clearAuthStorage() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    dispatchAuthChanged();
   }
-  window.location.href = "/Login";
-};
+}
+
+async function handleUnauthorized() {
+  if (typeof window !== "undefined") {
+    clearAuthStorage();
+    showToast("error", "Session expired, please login again").catch(() => {});
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+  }
+}
 
 async function request(url, options = {}) {
+  if (options.requireAuth && !getToken()) {
+    if (typeof window !== "undefined") {
+      showToast("error", "Please login first").catch(() => {});
+      window.location.href = "/login";
+    }
+    const error = new Error("Please login first");
+    error.name = "UnauthorizedRequestError";
+    throw error;
+  }
+
+  const fetchOptions = { ...options };
+  delete fetchOptions.requireAuth;
+  const token = fetchOptions.skipAuth ? null : getToken();
+  delete fetchOptions.skipAuth;
   const headers = {
     "Content-Type": "application/json",
-    ...getAuthHeader(),
-    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(fetchOptions.headers || {}),
   };
 
   const res = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers,
+    cache: fetchOptions.cache ?? "no-store",
   });
 
-  if (res.status === 401 || res.status === 403) {
-    handleUnauthorized();
-    throw new Error("Unauthorized");
+  const contentType = res.headers.get("content-type");
+  const data =
+    contentType && contentType.includes("application/json")
+      ? await res.json()
+      : {};
+
+  if (res.status === 401) {
+    await handleUnauthorized();
+    throw new Error(data.message || "Unauthorized");
   }
 
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    return res.json();
+  if (!res.ok) {
+    throw new Error(data.message || `Request failed with status ${res.status}`);
   }
-  return res;
+
+  return data;
+}
+
+export async function loginUser(credentials) {
+  const data = await request(`${API_BASE}/login`, {
+    method: "POST",
+    body: JSON.stringify(credentials),
+    skipAuth: true,
+  });
+
+  if (!data.token || !data.user) {
+    throw new Error(data.message || "Login response missing token or user");
+  }
+
+  setAuthStorage(data.token, data.user);
+  return data;
+}
+
+export async function registerUser(userData) {
+  const data = await request(`${API_BASE}/register`, {
+    method: "POST",
+    body: JSON.stringify(userData),
+    skipAuth: true,
+  });
+
+  if (!data.token || !data.user) {
+    throw new Error(data.message || "Register response missing token or user");
+  }
+
+  setAuthStorage(data.token, data.user);
+  return data;
 }
 
 export async function getTutors(search = "", startDate = "", endDate = "") {
@@ -62,6 +172,7 @@ export async function createTutor(tutorData) {
   return request(`${API_BASE}/tutors`, {
     method: "POST",
     body: JSON.stringify(tutorData),
+    requireAuth: true,
   });
 }
 
@@ -69,12 +180,14 @@ export async function updateTutor(id, tutorData) {
   return request(`${API_BASE}/tutors/${id}`, {
     method: "PATCH",
     body: JSON.stringify(tutorData),
+    requireAuth: true,
   });
 }
 
 export async function deleteTutor(id) {
   return request(`${API_BASE}/tutors/${id}`, {
     method: "DELETE",
+    requireAuth: true,
   });
 }
 
@@ -82,12 +195,16 @@ export async function createBooking(bookingData) {
   return request(`${API_BASE}/bookings`, {
     method: "POST",
     body: JSON.stringify(bookingData),
+    requireAuth: true,
   });
 }
 
 export async function fetchBookings(email) {
   const url = email ? `${API_BASE}/bookings/${email}` : `${API_BASE}/bookings`;
-  return request(url, { method: "GET" });
+  return request(url, {
+    method: "GET",
+    requireAuth: true,
+  });
 }
 
 export async function updateBookingStatus(id, status) {
@@ -99,27 +216,16 @@ export async function updateBookingStatus(id, status) {
   return request(url, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+    requireAuth: true,
   });
 }
 
 export async function getMyTutors(email) {
   return request(`${API_BASE}/my-tutors/${email}`, {
     cache: "no-store",
+    requireAuth: true,
   });
 }
 
 export const fetchMyTutors = getMyTutors;
-
-export function getToken() {
-  return typeof window !== "undefined" ? localStorage.getItem("token") : null;
-}
-
-export function getUser() {
-  if (typeof window === "undefined") return null;
-  const userStr = localStorage.getItem("user");
-  return userStr ? JSON.parse(userStr) : null;
-}
-
-export function isAuthenticated() {
-  return typeof window !== "undefined" ? !!localStorage.getItem("token") : false;
-}
+export { AUTH_CHANGED_EVENT };

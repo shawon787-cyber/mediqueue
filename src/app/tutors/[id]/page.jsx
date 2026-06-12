@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ThemeDetailsClient from "./ThemeDetailsClient";
-import PrivateRoute from "@/components/PrivateRoute";
 import { fetchTutorById } from "@/lib/api";
 
 export async function generateMetadata({ params }) {
@@ -39,9 +38,5 @@ export default async function TutorDetailsPage({ params }) {
 
   const tutor = data.data;
 
-  return (
-    <PrivateRoute>
-      <ThemeDetailsClient tutor={tutor} />
-    </PrivateRoute>
-  );
+  return <ThemeDetailsClient tutor={tutor} />;
 }

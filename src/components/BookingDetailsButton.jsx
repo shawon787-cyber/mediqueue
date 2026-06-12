@@ -2,17 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeContext";
-import { isAuthenticated } from "@/lib/api";
+import { useAuth } from "@/lib/AuthProvider";
 
 export default function BookingDetailsButton({ tutorId }) {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { isDark, isLoggedIn } = useAuth();
 
   const handleBookSession = () => {
-    if (isAuthenticated()) {
+    if (isLoggedIn) {
       router.push(`/tutors/${tutorId}`);
     } else {
-      router.push("/sign-up");
+      router.push("/login");
     }
   };
 

@@ -1,61 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeContext";
-import { isAuthenticated, getUser } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/AuthProvider";
 import Image from "next/image";
 
 export default function Navbar() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { user, isLoggedIn, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const { data: session } = authClient.useSession();
-
-  const localUser = useMemo(() => getUser(), []);
-  const isLocalAuth = useMemo(() => isAuthenticated(), []);
-
-  const sessionUser = useMemo(() => {
-    if (!session?.user) return null;
-    return {
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
-    };
-  }, [session]);
-
-  const authenticated = Boolean(sessionUser) || isLocalAuth;
-  const user = sessionUser || localUser;
-
   const handleLogout = async () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("betterAuthSession");
-    await authClient.signOut();
+    await logout();
     router.push("/");
-    router.refresh();
   };
 
   const navLinks = (
     <>
       <li>
-        <Link href="/" className="font-medium">Home</Link>
+        <Link href="/" className="font-medium">
+          Home
+        </Link>
       </li>
       <li>
-        <Link href="/tutors" className="font-medium">Tutors</Link>
+        <Link href="/tutors" className="font-medium">
+          Tutors
+        </Link>
       </li>
-      {authenticated && user && (
+      {isLoggedIn && (
         <>
           <li>
-            <Link href="/add-tutor" className="font-medium">Add Tutor</Link>
+            <Link href="/add-tutor" className="font-medium">
+              Add Tutor
+            </Link>
           </li>
           <li>
-            <Link href="/MyTutors" className="font-medium">My Tutors</Link>
+            <Link href="/MyTutors" className="font-medium">
+              My Tutors
+            </Link>
           </li>
           <li>
             <Link href="/my-booked-session" className="font-medium">
@@ -107,15 +93,13 @@ export default function Navbar() {
         </div>
 
         <div className="hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 gap-2">
-            {navLinks}
-          </ul>
+          <ul className="menu menu-horizontal px-1 gap-2">{navLinks}</ul>
         </div>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {authenticated && user ? (
+          {isLoggedIn ? (
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -129,7 +113,7 @@ export default function Navbar() {
                       : "ring-primary ring-offset-base-100"
                   }`}
                 >
-                  {user.image ? (
+                  {user?.image ? (
                     <Image
                       src={user.image}
                       alt={user.name || "User"}
@@ -142,7 +126,7 @@ export default function Navbar() {
                       className="w-full h-full flex items-center justify-center text-white text-lg font-semibold"
                       style={{ backgroundColor: "#0675C1" }}
                     >
-                      {(user.email?.[0] || user.name?.[0] || "U").toUpperCase()}
+                      {(user?.email?.[0] || user?.name?.[0] || "U").toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -157,7 +141,7 @@ export default function Navbar() {
                 }`}
               >
                 <li className="menu-title">
-                  <span>{user.name}</span>
+                  <span>{user?.name || "Account"}</span>
                 </li>
                 <li>
                   <Link href="/my-booked-session">My Booked Sessions</Link>
@@ -171,13 +155,15 @@ export default function Navbar() {
             <div className="hidden md:flex gap-2">
               <Link
                 href="/sign-up"
-                className={`btn btn-sm ${theme === "dark" ? "btn-ghost text-gray-200" : ""}`}
+                className={`btn btn-sm ${
+                  theme === "dark" ? "btn-ghost text-gray-200" : ""
+                }`}
               >
                 Register
               </Link>
 
               <Link
-                href="/Login"
+                href="/login"
                 className="btn btn-sm bg-[#0675c1] text-white"
               >
                 Login
@@ -209,10 +195,10 @@ export default function Navbar() {
           <ul className="menu p-4 gap-2">
             {navLinks}
 
-            {authenticated && user ? (
+            {isLoggedIn ? (
               <>
                 <li className="menu-title">
-                  <span>{user.name}</span>
+                  <span>{user?.name || "Account"}</span>
                 </li>
                 <li>
                   <Link href="/my-booked-session">My Booked Sessions</Link>
@@ -227,7 +213,7 @@ export default function Navbar() {
                   <Link href="/sign-up">Register</Link>
                 </li>
                 <li>
-                  <Link href="/Login">Login</Link>
+                  <Link href="/login">Login</Link>
                 </li>
               </>
             )}
