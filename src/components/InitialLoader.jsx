@@ -4,14 +4,17 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function InitialLoader() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (sessionStorage.getItem("mediquee-initial-loaded")) {
       setShow(false);
       return;
     }
 
+    setShow(true);
     sessionStorage.setItem("mediquee-initial-loaded", "true");
 
     const timer = setTimeout(() => {
@@ -21,7 +24,7 @@ export default function InitialLoader() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!show) return null;
+  if (!mounted || !show) return null;
 
   return (
     <motion.div
