@@ -28,7 +28,7 @@ const MyTutorsPage = () => {
 
   useEffect(() => {
     if (!user?.email) return;
-    fetchMyTutors(user.email)
+    fetchMyTutors()
       .then((data) => {
         if (data.success) {
           setTutors(data.data || []);

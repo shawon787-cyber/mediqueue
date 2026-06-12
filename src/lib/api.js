@@ -1,5 +1,9 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const AUTH_CHANGED_EVENT = "auth-state-changed";
+
+if (typeof window !== "undefined") {
+  console.log("API URL:", API_BASE_URL);
+}
 
 const showToast = async (type, message) => {
   if (typeof window === "undefined") return;
@@ -75,6 +79,9 @@ async function handleUnauthorized() {
 }
 
 async function request(url, options = {}) {
+  if (typeof window !== "undefined") {
+    console.log("Request:", url);
+  }
   if (options.requireAuth && !getToken()) {
     if (typeof window !== "undefined") {
       showToast("error", "Please login first").catch(() => {});
@@ -95,21 +102,49 @@ async function request(url, options = {}) {
     ...(fetchOptions.headers || {}),
   };
 
-  const res = await fetch(url, {
-    ...fetchOptions,
-    headers,
-    cache: fetchOptions.cache ?? "no-store",
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      ...fetchOptions,
+      headers,
+      cache: fetchOptions.cache ?? "no-store",
+    });
+  } catch (networkError) {
+    if (typeof window !== "undefined") {
+      console.error("Network error:", networkError);
+    }
+    throw new Error("Network error - please check your connection");
+  }
 
   const contentType = res.headers.get("content-type");
   const data =
     contentType && contentType.includes("application/json")
-      ? await res.json()
+      ? await res.json().catch(() => ({}))
       : {};
+
+  if (typeof window !== "undefined") {
+    console.log("Response:", { status: res.status, data });
+  }
+
+  if (res.status === 400) {
+    throw new Error(data.message || "Bad request");
+  }
 
   if (res.status === 401) {
     await handleUnauthorized();
     throw new Error(data.message || "Unauthorized");
+  }
+
+  if (res.status === 403) {
+    throw new Error(data.message || "Forbidden - access denied");
+  }
+
+  if (res.status === 404) {
+    throw new Error(data.message || "Resource not found");
+  }
+
+  if (res.status === 500) {
+    throw new Error(data.message || "Server error");
   }
 
   if (!res.ok) {
@@ -120,7 +155,7 @@ async function request(url, options = {}) {
 }
 
 export async function loginUser(credentials) {
-  const data = await request(`${API_BASE}/login`, {
+  const data = await request(`${API_BASE_URL}/login`, {
     method: "POST",
     body: JSON.stringify(credentials),
     skipAuth: true,
@@ -135,7 +170,7 @@ export async function loginUser(credentials) {
 }
 
 export async function registerUser(userData) {
-  const data = await request(`${API_BASE}/register`, {
+  const data = await request(`${API_BASE_URL}/register`, {
     method: "POST",
     body: JSON.stringify(userData),
     skipAuth: true,
@@ -155,7 +190,7 @@ export async function getTutors(search = "", startDate = "", endDate = "") {
   if (startDate) params.set("startDate", startDate);
   if (endDate) params.set("endDate", endDate);
 
-  return request(`${API_BASE}/tutors?${params.toString()}`, {
+  return request(`${API_BASE_URL}/tutors?${params.toString()}`, {
     cache: "no-store",
   });
 }
@@ -163,13 +198,13 @@ export async function getTutors(search = "", startDate = "", endDate = "") {
 export const fetchTutors = getTutors;
 
 export async function fetchTutorById(id) {
-  return request(`${API_BASE}/tutors/${id}`, {
+  return request(`${API_BASE_URL}/tutors/${id}`, {
     cache: "no-store",
   });
 }
 
 export async function createTutor(tutorData) {
-  return request(`${API_BASE}/tutors`, {
+  return request(`${API_BASE_URL}/tutors`, {
     method: "POST",
     body: JSON.stringify(tutorData),
     requireAuth: true,
@@ -177,7 +212,7 @@ export async function createTutor(tutorData) {
 }
 
 export async function updateTutor(id, tutorData) {
-  return request(`${API_BASE}/tutors/${id}`, {
+  return request(`${API_BASE_URL}/tutors/${id}`, {
     method: "PATCH",
     body: JSON.stringify(tutorData),
     requireAuth: true,
@@ -185,14 +220,14 @@ export async function updateTutor(id, tutorData) {
 }
 
 export async function deleteTutor(id) {
-  return request(`${API_BASE}/tutors/${id}`, {
+  return request(`${API_BASE_URL}/tutors/${id}`, {
     method: "DELETE",
     requireAuth: true,
   });
 }
 
 export async function createBooking(bookingData) {
-  return request(`${API_BASE}/bookings`, {
+  return request(`${API_BASE_URL}/bookings`, {
     method: "POST",
     body: JSON.stringify(bookingData),
     requireAuth: true,
@@ -200,8 +235,10 @@ export async function createBooking(bookingData) {
 }
 
 export async function fetchBookings(email) {
-  const url = email ? `${API_BASE}/bookings/${email}` : `${API_BASE}/bookings`;
-  return request(url, {
+  // Backend GET /bookings endpoint - email is optional query param
+  const params = new URLSearchParams();
+  if (email) params.set("email", email);
+  return request(`${API_BASE_URL}/bookings?${params.toString()}`, {
     method: "GET",
     requireAuth: true,
   });
@@ -210,8 +247,8 @@ export async function fetchBookings(email) {
 export async function updateBookingStatus(id, status) {
   const url =
     status === "Confirmed"
-      ? `${API_BASE}/bookings/confirm/${id}`
-      : `${API_BASE}/bookings/${id}`;
+      ? `${API_BASE_URL}/bookings/confirm/${id}`
+      : `${API_BASE_URL}/bookings/${id}`;
 
   return request(url, {
     method: "PATCH",
@@ -221,7 +258,7 @@ export async function updateBookingStatus(id, status) {
 }
 
 export async function getMyTutors(email) {
-  return request(`${API_BASE}/my-tutors/${email}`, {
+  return request(`${API_BASE_URL}/my-tutors`, {
     cache: "no-store",
     requireAuth: true,
   });

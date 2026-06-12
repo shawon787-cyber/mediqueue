@@ -15,7 +15,7 @@ export default function MyBookedSession() {
 
   useEffect(() => {
     if (!user?.email) return;
-    fetchBookings(user.email)
+    fetchBookings()
       .then((data) => {
         if (data.success) {
           setBookings(data.data || []);
