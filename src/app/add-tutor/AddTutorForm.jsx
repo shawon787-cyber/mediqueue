@@ -83,10 +83,11 @@ export default function AddTutorForm() {
               </label>
               <select
                 name="subject"
+                defaultValue=""
                 className={`select select-bordered w-full rounded-xl focus:outline-none focus:border-[#0675c1] ${isDark ? "bg-[#1a2235] border-gray-700 text-white" : ""}`}
                 required
               >
-                <option disabled selected>Select Subject</option>
+                <option disabled value="">Select Subject</option>
                 <option>Mathematics</option>
                 <option>Physics</option>
                 <option>Chemistry</option>
@@ -105,10 +106,11 @@ export default function AddTutorForm() {
               </label>
               <select
                 name="teachingMode"
+                defaultValue=""
                 className={`select select-bordered w-full rounded-xl focus:outline-none focus:border-[#0675c1] ${isDark ? "bg-[#1a2235] border-gray-700 text-white" : ""}`}
                 required
               >
-                <option disabled selected>Select Mode</option>
+                <option disabled value="">Select Mode</option>
                 <option>Online</option>
                 <option>Offline</option>
                 <option>Both</option>

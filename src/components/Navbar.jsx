@@ -11,8 +11,10 @@ import Image from "next/image";
 export default function Navbar() {
   const { theme } = useTheme();
   const router = useRouter();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, isHydrated, logout } = useAuth();
   const [open, setOpen] = useState(false);
+
+  const closeMenu = () => setOpen(false);
 
   const handleLogout = async () => {
     await logout();
@@ -22,29 +24,29 @@ export default function Navbar() {
   const navLinks = (
     <>
       <li>
-        <Link href="/" className="font-medium">
+        <Link href="/" className="font-medium" onClick={closeMenu}>
           Home
         </Link>
       </li>
       <li>
-        <Link href="/tutors" className="font-medium">
+        <Link href="/tutors" className="font-medium" onClick={closeMenu}>
           Tutors
         </Link>
       </li>
-      {isLoggedIn && (
+      {isHydrated && isLoggedIn && (
         <>
           <li>
-            <Link href="/add-tutor" className="font-medium">
+            <Link href="/add-tutor" className="font-medium" onClick={closeMenu}>
               Add Tutor
             </Link>
           </li>
           <li>
-            <Link href="/MyTutors" className="font-medium">
+            <Link href="/MyTutors" className="font-medium" onClick={closeMenu}>
               My Tutors
             </Link>
           </li>
           <li>
-            <Link href="/my-booked-session" className="font-medium">
+            <Link href="/my-booked-session" className="font-medium" onClick={closeMenu}>
               My Booked Sessions
             </Link>
           </li>
@@ -55,7 +57,8 @@ export default function Navbar() {
 
   return (
     <header
-      className={`w-full shadow relative transition-colors duration-400 ${
+      suppressHydrationWarning
+      className={`sticky top-0 z-50 w-full shadow backdrop-blur transition-colors duration-400 ${
         theme === "dark"
           ? "bg-[#0f1623] border-b border-gray-800"
           : "bg-base-100"
@@ -99,9 +102,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {isLoggedIn ? (
+          {isHydrated && isLoggedIn ? (
             <div className="dropdown dropdown-end">
-              <div
+              <button
+                type="button"
                 tabIndex={0}
                 role="button"
                 className="btn btn-ghost btn-circle avatar"
@@ -130,11 +134,11 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              </div>
+              </button>
 
               <ul
                 tabIndex={0}
-                className={`menu menu-sm dropdown-content mt-3 z-100 p-2 shadow rounded-box w-56 ${
+                className={`menu menu-sm dropdown-content mt-3 z-[60] p-2 shadow rounded-box w-56 ${
                   theme === "dark"
                     ? "bg-[#111827] border border-gray-700 text-gray-200"
                     : "bg-base-100"
@@ -144,17 +148,18 @@ export default function Navbar() {
                   <span>{user?.name || "Account"}</span>
                 </li>
                 <li>
-                  <Link href="/my-booked-session">My Booked Sessions</Link>
+                  <Link href="/my-booked-session" onClick={closeMenu}>My Booked Sessions</Link>
                 </li>
                 <li>
-                  <button onClick={handleLogout}>Logout</button>
+                  <button type="button" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
             </div>
-          ) : (
+          ) : isHydrated ? (
             <div className="hidden md:flex gap-2">
               <Link
                 href="/sign-up"
+                onClick={closeMenu}
                 className={`btn btn-sm ${
                   theme === "dark" ? "btn-ghost text-gray-200" : ""
                 }`}
@@ -164,15 +169,19 @@ export default function Navbar() {
 
               <Link
                 href="/login"
+                onClick={closeMenu}
                 className="btn btn-sm bg-[#0675c1] text-white"
               >
                 Login
               </Link>
             </div>
-          )}
+          ) : null}
 
           <div className="lg:hidden">
             <button
+              type="button"
+              aria-expanded={open}
+              aria-label="Toggle navigation menu"
               onClick={() => setOpen(!open)}
               className={`btn btn-square btn-ghost ${
                 theme === "dark" ? "text-gray-200" : ""
@@ -186,7 +195,7 @@ export default function Navbar() {
 
       {open && (
         <div
-          className={`absolute top-16 left-0 w-full shadow-lg lg:hidden z-50 border-t ${
+          className={`absolute left-0 top-16 z-[60] w-full shadow-lg lg:hidden border-t ${
             theme === "dark"
               ? "bg-[#0f1623] border-gray-800"
               : "bg-base-100 border-base-200"
@@ -195,28 +204,28 @@ export default function Navbar() {
           <ul className="menu p-4 gap-2">
             {navLinks}
 
-            {isLoggedIn ? (
+            {isHydrated && isLoggedIn ? (
               <>
                 <li className="menu-title">
                   <span>{user?.name || "Account"}</span>
                 </li>
                 <li>
-                  <Link href="/my-booked-session">My Booked Sessions</Link>
+                  <Link href="/my-booked-session" onClick={closeMenu}>My Booked Sessions</Link>
                 </li>
                 <li>
-                  <button onClick={handleLogout}>Logout</button>
+                  <button type="button" onClick={handleLogout}>Logout</button>
                 </li>
               </>
-            ) : (
+            ) : isHydrated ? (
               <>
                 <li>
-                  <Link href="/sign-up">Register</Link>
+                  <Link href="/sign-up" onClick={closeMenu}>Register</Link>
                 </li>
                 <li>
-                  <Link href="/login">Login</Link>
+                  <Link href="/login" onClick={closeMenu}>Login</Link>
                 </li>
               </>
-            )}
+            ) : null}
           </ul>
         </div>
       )}

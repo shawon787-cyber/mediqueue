@@ -1,3 +1,4 @@
+import Script from "next/script";
 import "@/app/globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
 import Navbar from "@/components/Navbar";
@@ -20,6 +21,26 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (!theme) {
+                    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+                    theme = mq.matches ? 'dark' : 'light';
+                  }
+                  if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <InitialLoader />
         <AuthProvider>
           <ThemeProvider>
@@ -28,7 +49,7 @@ export default function RootLayout({ children }) {
               <main className="relative z-10 flex-grow w-full">
                 {children}
                 <div className="fixed top-4 right-4 z-9999">
-                  <ToastContainer position="top-right" />
+                  <ToastContainer position="bottom-right" />
                 </div>
                 
               </main>

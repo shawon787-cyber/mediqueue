@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 function subscribe(callback) {
   window.addEventListener("storage", callback);
@@ -54,12 +54,5 @@ function applyTheme(theme) {
 }
 
 export function ThemeProvider({ children }) {
-  useEffect(() => {
-    try {
-      const stored = getStoredTheme();
-      applyTheme(stored);
-    } catch {}
-  }, []);
-
   return <>{children}</>;
 }
